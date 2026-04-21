@@ -2,11 +2,19 @@
 
 const Database = require('better-sqlite3');
 const path = require('path');
+const fs = require('fs');
 const logger = require('../utils/Logger');
 
 class DB {
   constructor() {
-    this.db = new Database(path.join(__dirname, '../../data/scraper.db'));
+    const dbPath = path.join(__dirname, '../../data/scraper.db');
+    const dbDir = path.dirname(dbPath);
+
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+
+    this.db = new Database(dbPath);
     this.init();
   }
 
