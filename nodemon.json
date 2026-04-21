@@ -1,0 +1,12 @@
+{
+  "ignore": [
+    "*.json",
+    "cache/*",
+    "data/*",
+    "*.csv",
+    "*.log",
+    "node_modules/*",
+    "whatsapp-session/*"
+  ],
+  "ext": "js,mjs,cjs,json"
+}

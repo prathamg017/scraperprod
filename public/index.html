@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lead Scraper Pro — Gold Mine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0e1a;
+      --surface:  #111827;
+      --surface2: #1a2233;
+      --border:   #1f2d40;
+      --accent:   #3b82f6;
+      --accent2:  #8b5cf6;
+      --green:    #22c55e;
+      --red:      #ef4444;
+      --yellow:   #f59e0b;
+      --text:     #f1f5f9;
+      --muted:    #64748b;
+      --muted2:   #94a3b8;
+      --radius:   14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ─────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .topbar-logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 1.1rem; font-weight: 800; letter-spacing: -0.03em;
+    }
+    .topbar-logo .dot { color: var(--accent); }
+    .topbar-stats {
+      display: flex; gap: 1.5rem; font-size: 0.78rem; color: var(--muted2);
+    }
+    .topbar-stat strong { color: var(--text); font-weight: 600; }
+
+    /* ── Main layout ─────────────────────── */
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 2rem; }
+
+    /* ── Hero ────────────────────────────── */
+    .hero { text-align: center; padding: 3rem 0 2rem; }
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+    }
+    .hero p { color: var(--muted2); font-size: 1.05rem; max-width: 520px; margin: 0 auto; }
+
+    /* ── Search box ──────────────────────── */
+    .search-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      display: grid;
+      grid-template-columns: 2fr 1fr auto auto auto auto;
+      gap: 1rem;
+      align-items: end;
+      margin: 2rem 0;
+    }
+    .fg { display: flex; flex-direction: column; gap: 0.4rem; }
+    .fg label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .fg input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      padding: 0.65rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .fg input:focus { border-color: var(--accent); }
+    .fg input::placeholder { color: var(--muted); }
+
+    .btn-go {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none; border-radius: 9px;
+      color: #fff; font-family: 'Inter', sans-serif;
+      font-size: 0.95rem; font-weight: 700;
+      padding: 0.65rem 1.6rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-go:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-go:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn-export {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--green); font-family: 'Inter', sans-serif;
+      font-size: 0.9rem; font-weight: 600;
+      padding: 0.65rem 1.2rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-export:hover { background: #0a1a10; }
+
+    /* ── No Website Only checkbox ────────── */
+    .nw-toggle {
+      display: flex; align-items: center; gap: 0.5rem;
+      cursor: pointer; user-select: none;
+      padding: 0.5rem 0.9rem;
+      background: var(--surface2);
+      border: 2px solid var(--border);
+      border-radius: 9px;
+      font-size: 0.82rem; font-weight: 600; line-height: 1.3;
+      color: var(--muted2);
+      transition: all 0.2s;
+      white-space: nowrap;
+      align-self: end;
+    }
+    .nw-toggle input[type="checkbox"] { display: none; }
+    .nw-box {
+      width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+      border: 2px solid var(--border); background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .nw-toggle.active .nw-box  { background: #f59e0b; border-color: #f59e0b; }
+    .nw-toggle.active .nw-box::after { content: '✓'; color: #000; font-size: 13px; font-weight: 900; }
+    .nw-toggle.active { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.1); }
+
+    /* ── Status bar ──────────────────────── */
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0.9rem 1.5rem;
+      margin-bottom: 1rem; font-size: 0.85rem;
+    }
+    .status-left { display: flex; align-items: center; gap: 0.75rem; }
+    .pulse {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--green);
+      animation: pulseAnim 1.5s ease-in-out infinite;
+    }
+    .pulse.idle { background: var(--muted); animation: none; }
+    .pulse.error { background: var(--red); animation: none; }
+    @keyframes pulseAnim { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
+
+    #status-text { color: var(--muted2); font-weight: 500; }
+    #lead-badge {
+      background: linear-gradient(135deg, #1e40af, #4c1d95);
+      color: #fff; border-radius: 20px; padding: 0.25rem 0.8rem;
+      font-size: 0.78rem; font-weight: 700;
+    }
+
+    /* ── Table ───────────────────────────── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      background: var(--surface2);
+      color: var(--muted);
+      font-size: 0.72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 1rem 1.2rem; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      animation: fadeSlide 0.3s ease forwards;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    td { padding: 0.85rem 1.2rem; font-size: 0.88rem; vertical-align: middle; }
+
+    .lead-name { font-weight: 600; color: var(--text); }
+    .lead-cat { color: var(--muted); font-size: 0.75rem; margin-top: 2px; }
+
+    /* WhatsApp button */
+    .wa-btn {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: #25D366; color: #000; font-weight: 700;
+      border-radius: 7px; padding: 4px 10px; font-size: 0.8rem;
+      text-decoration: none; transition: all 0.2s; white-space: nowrap;
+    }
+    .wa-btn:hover { background: #1ebe5d; transform: scale(1.04); }
+    .wa-btn svg { flex-shrink: 0; }
+
+    .phone-cell {
+      color: var(--accent); font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: color 0.2s;
+    }
+    .phone-cell:hover { color: #60a5fa; }
+    .phone-cell.copied { color: var(--green) !important; }
+
+    .web-link { color: var(--accent); text-decoration: none; font-size: 0.82rem; }
+    .web-link:hover { text-decoration: underline; }
+    .no-web { color: var(--red); font-weight: 600; font-size: 0.82rem; }
+
+    .badge {
+      display: inline-block; border-radius: 6px;
+      padding: 3px 9px; font-size: 0.72rem; font-weight: 700;
+    }
+    .badge-hot   { background: #451a03; color: #fb923c; }
+    .badge-warm  { background: #1c1917; color: #fbbf24; }
+    .badge-cold  { background: #0c1a10; color: #4ade80; }
+
+    .rating-cell { color: var(--muted2); font-size: 0.82rem; }
+    .stars { color: #f59e0b; }
+
+    .hours-cell { color: var(--muted); font-size: 0.78rem; max-width: 140px; }
+
+    /* ── Empty state ─────────────────────── */
+    .empty-state {
+      text-align: center; padding: 4rem 2rem; color: var(--muted);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-state p { font-size: 0.95rem; }
+
+    /* ── Responsive ──────────────────────── */
+    @media (max-width: 768px) {
+      .search-box { grid-template-columns: 1fr; }
+      .topbar-stats { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <span>⚡</span> Lead<span class="dot">Mine</span>
+  </div>
+  <div class="topbar-stats">
+    <span>Status: <strong id="srv-status">—</strong></span>
+    <span>Total Leads: <strong id="srv-total">0</strong></span>
+    <span>Jobs: <strong id="srv-jobs">0</strong></span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="wrap">
+  <div class="hero">
+    <h1>Your Gold Mine of Leads</h1>
+    <p>Extract phones, addresses, websites & hours from any business category, anywhere on earth.</p>
+  </div>
+
+  <!-- SEARCH BOX -->
+  <div class="search-box">
+    <div class="fg">
+      <label>Business Type</label>
+      <input id="query" type="text" placeholder="e.g. Restaurants, Dentists, Gyms, Lawyers…" value="">
+    </div>
+    <div class="fg">
+      <label>Location</label>
+      <input id="location" type="text" placeholder="e.g. London, Dubai, New York…" value="">
+    </div>
+    <div class="fg">
+      <label>Max Leads</label>
+      <input id="limit" type="number" min="1" max="500" value="50" style="max-width:100px">
+    </div>
+    <label class="nw-toggle" id="nw-toggle-label" title="Only get businesses with NO website — highest-converting leads, much faster">
+      <input type="checkbox" id="only-no-web">
+      <span class="nw-box"></span>
+      <span>🔥 No Website<br><small style="opacity:0.7">Only (faster)</small></span>
+    </label>
+    <div class="fg">
+      <label>Template</label>
+      <select id="template-select" style="background:var(--bg); border:1px solid var(--border); border-radius:9px; color:var(--text); padding:0.65rem; font-size:0.9rem; outline:none;">
+        <option value="standard">Standard (Indore)</option>
+        <option value="competitor">Competitor (Service/City)</option>
+      </select>
+    </div>
+    <button class="btn-go" id="start-btn" onclick="startScrape()">🚀 Hunt Leads</button>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar" id="status-bar" style="display:none">
+    <div class="status-left">
+      <div class="pulse idle" id="pulse-dot"></div>
+      <span id="status-text">Initializing…</span>
+      <span id="lead-badge">0 leads</span>
+    </div>
+    <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap" id="table-wrap" style="display:none">
+    <table>
+      <thead>
+        <tr>
+          <th>Business Name</th>
+          <th style="color:var(--accent)">📞 Contact Number</th>
+          <th>Website / Link</th>
+          <th>Quality</th>
+          <th>Physical Address</th>
+          <th>Rating</th>
+        </tr>
+      </thead>
+      <tbody id="lead-body"></tbody>
+    </table>
+    <div id="empty-state" class="empty-state">
+      <div class="icon">🔍</div>
+      <p>Leads will appear here in real time as they are extracted…</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Personalized outreach message (per lead) ─────────────────────────────
+  // ── Personalized outreach message (per lead) ─────────────────────────────
+  const msgTemplates = {
+    standard: (name) => `Hi ${name} 👋
+
+I’m Pratham Gangwal from Indore. I work with a small team helping professionals and businesses grow online through websites, apps, and better Google visibility.
+
+I came across your profile and felt your online presence has strong potential with the right setup.
+
+You can simply share your budget, and we’ll suggest the best solution within it — practical and result-focused.
+
+(Domain/hosting charges, if needed, are separate.)
+
+If you'd like, I can also share a few ideas specifically for you 😊`,
+
+    competitor: (name, svc, city) => `Hi ${name} 👋
+
+Just searched for ${svc} in ${city}.
+
+Your competitors are showing up — you’re missing customers there.
+
+I help businesses build websites that improve trust + Google visibility.
+
+Tell me your budget, and I’ll suggest the best option for you 😊`
+  };
+
+  function getWAMsg(name) {
+    const type = document.getElementById('template-select').value;
+    const svc  = document.getElementById('query').value || 'your service';
+    const city = document.getElementById('location').value || 'your area';
+    
+    const raw = (type === 'competitor') 
+      ? msgTemplates.competitor(name, svc, city) 
+      : msgTemplates.standard(name);
+      
+    return encodeURIComponent(raw);
+  }
+
+  let currentJobId = null;
+  let pollTimer    = null;
+  const renderedIds = new Set();
+
+  // ── Server stats ─────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const d = await (await fetch('/api/stats')).json();
+      document.getElementById('srv-status').textContent = d.status || 'ok';
+      document.getElementById('srv-total').textContent  = (d.totalLeads || 0).toLocaleString();
+      document.getElementById('srv-jobs').textContent   = d.totalJobs || 0;
+    } catch(_) {}
+  }
+  loadStats();
+  setInterval(loadStats, 8000);
+
+  // ── No Website toggle interactivity ──────────────────────────
+  document.getElementById('only-no-web').addEventListener('change', function() {
+    document.getElementById('nw-toggle-label').classList.toggle('active', this.checked);
+  });
+
+  // ── Start scrape ─────────────────────────────────────────────
+  async function startScrape() {
+    const query      = document.getElementById('query').value.trim();
+    const location   = document.getElementById('location').value.trim();
+    const limit      = parseInt(document.getElementById('limit').value) || 50;
+    const onlyNoWeb  = document.getElementById('only-no-web').checked;
+
+    if (!query || !location) return alert('Enter a business type and location.');
+
+    // Reset UI
+    clearInterval(pollTimer);
+    renderedIds.clear();
+    document.getElementById('lead-body').innerHTML = '';
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('status-bar').style.display  = 'flex';
+    document.getElementById('table-wrap').style.display  = 'block';
+    setStatus(onlyNoWeb ? '🔥 Turbo: hunting no-website leads…' : '⚡ Discovering leads…', 'active', 0);
+
+    const btn = document.getElementById('start-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Starting…';
+
+    try {
+      const res  = await fetch('/api/scrape', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, location, limit, onlyNoWeb }),
+      });
+      const data = await res.json();
+
+      if (!data.jobId) throw new Error(data.error || 'No job ID returned');
+
+      currentJobId = data.jobId;
+      setStatus(`Discovering leads for "${query}" in "${location}"…`, 'active', 0);
+      pollJob(currentJobId);
+    } catch(err) {
+      setStatus('Error: ' + err.message, 'error', 0);
+      btn.disabled = false;
+      btn.textContent = '🚀 Hunt Leads';
+    }
+  }
+
+  // ── Poll job ─────────────────────────────────────────────────
+  function pollJob(id) {
+    pollTimer = setInterval(async () => {
+      try {
+        const d = await (await fetch('/api/job/' + id)).json();
+        renderLeads(d.results || []);
+
+        const count = renderedIds.size;
+        document.getElementById('lead-badge').textContent = count + ' leads';
+
+        if (d.status === 'scraping') {
+          setStatus(`⚡ Extracting… ${d.leads_collected || 0} leads found so far`, 'active', count);
+        } else if (d.status === 'completed') {
+          clearInterval(pollTimer);
+          setStatus(`✅ Done! ${count} leads harvested.`, 'idle', count);
+          const btn = document.getElementById('start-btn');
+          btn.disabled = false;
+          btn.textContent = '🚀 Hunt Leads';
+          document.getElementById('lead-badge').textContent = count + ' leads ✅';
+        } else if (d.status === 'error') {
+          clearInterval(pollTimer);
+          setStatus('❌ Error: ' + (d.error_message || 'Unknown'), 'error', count);
+          const btn = document.getElementById('start-btn');
+          btn.disabled = false; btn.textContent = '🚀 Hunt Leads';
+        }
+      } catch(_) {}
+    }, 1000);
+  }
+
+  // ── Render leads into table ───────────────────────────────────
+  function renderLeads(leads) {
+    const tbody = document.getElementById('lead-body');
+    let added = 0;
+    for (const l of leads) {
+      if (renderedIds.has(l.id)) continue;
+      renderedIds.add(l.id);
+      added++;
+
+      if (renderedIds.size === 1) {
+        document.getElementById('empty-state').style.display = 'none';
+      }
+
+      const type = l.type || '';
+      const badgeClass = type.includes('🔥') ? 'badge-hot' : type.includes('⚡') ? 'badge-warm' : 'badge-cold';
+      const rating = l.rating ? `<span class="stars">★</span> ${l.rating}` : '';
+      const reviews = l.reviews ? ` (${l.reviews})` : '';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div class="lead-name">${esc(l.name)}</div>
+          ${l.category ? `<div class="lead-cat">${esc(l.category)}</div>` : ''}
+        </td>
+        <td>
+          ${l.phone && l.phone !== 'No Contact Found'
+            ? `<div style="display:flex;flex-direction:column;gap:5px">
+                <a class="wa-btn" href="https://api.whatsapp.com/send?phone=${(()=>{ const d=l.phone.replace(/\D/g,'').replace(/^0+/,''); return d.startsWith('91')&&d.length>10?d:'91'+d.slice(-10); })()}&text=${getWAMsg(esc(l.name))}" target="_blank" rel="noopener" title="Send outreach message on WhatsApp">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.845L.057 23.882l6.19-1.625A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-4.988-1.363l-.358-.213-3.714.975.994-3.63-.232-.374A9.787 9.787 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+                  ${esc(l.phone)}
+                </a>
+                <div class="phone-cell" onclick="copyPhone(this,'${esc(l.phone)}')" style="font-size:0.73rem;opacity:0.7"><span>📋</span> Copy</div>
+              </div>`
+            : `<span style="color:var(--muted);font-size:0.8rem">${l.phone === 'No Contact Found' ? 'No Contact' : '—'}</span>`}
+        </td>
+        <td>
+          ${l.website
+            ? `<a class="web-link" href="${esc(l.website)}" target="_blank" rel="noopener">Visit ↗</a>`
+            : `<span class="no-web">No Website ✓</span>`}
+        </td>
+        <td><span class="badge ${badgeClass}">${esc(type)}</span></td>
+        <td style="color:var(--muted2);font-size:0.82rem;max-width:180px">${esc(l.address || '—')}</td>
+        <td class="rating-cell">${rating}${reviews}</td>
+        <td class="hours-cell">${esc(l.hours || '—')}</td>
+      `;
+      tbody.prepend(tr);
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function setStatus(msg, mode, count) {
+    document.getElementById('status-text').textContent = msg;
+    const dot = document.getElementById('pulse-dot');
+    dot.className = 'pulse ' + (mode === 'active' ? '' : mode === 'error' ? 'error' : 'idle');
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function copyPhone(el, phone) {
+    navigator.clipboard.writeText(phone).then(() => {
+      el.classList.add('copied');
+      el.children[1].textContent = 'Copied!';
+      setTimeout(() => { el.classList.remove('copied'); el.children[1].textContent = phone; }, 1500);
+    });
+  }
+
+  function exportCSV() {
+    const rows = Array.from(document.querySelectorAll('#lead-body tr'));
+    if (!rows.length) return alert('No leads yet!');
+
+    const headers = ['Name','Category','Phone','Website','Quality','Address','Rating','Reviews','Hours'];
+    const lines = [headers.join(',')];
+
+    rows.forEach(tr => {
+      const tds = tr.querySelectorAll('td');
+      const name = tds[0]?.querySelector('.lead-name')?.innerText || '';
+      const cat  = tds[0]?.querySelector('.lead-cat')?.innerText  || '';
+      const phone   = tds[1]?.innerText?.replace('📋','').trim() || '';
+      const website = tds[2]?.querySelector('a')?.href || (tds[2]?.innerText?.trim() || '');
+      const quality = tds[3]?.innerText || '';
+      const addr    = tds[4]?.innerText || '';
+      const ratingEl = tds[5]?.innerText || '';
+      const h = headers.map((_,i) => '');
+      const row = [name, cat, phone, website, quality, addr, ratingEl, '', tds[6]?.innerText || ''];
+      lines.push(row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+    });
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+    a.download = 'leads-' + Date.now() + '.csv';
+    a.click();
+  }
+</script>
+</body>
+</html>
